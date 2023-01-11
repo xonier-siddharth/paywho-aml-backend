@@ -21,3 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/create-rule', [AMLRuleController::class, 'create_rule']);
 Route::post('/evaluate-operation', [AMLRuleController::class, 'evaluate_operation']);
+
+
+
+Route::post('/getRule', [\App\Http\Controllers\Api\RulesController::class, 'getRule']);
