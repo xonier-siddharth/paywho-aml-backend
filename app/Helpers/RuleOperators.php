@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 class RuleOperators
 {
-    public function isEqual($field_name,$value): bool
+    public function equalTo($field_name,$value): bool
     {
         if($field_name == $value){
             return true;
@@ -13,7 +13,7 @@ class RuleOperators
         }
     }
 
-    public function isGreaterThan($field_name,$value): bool
+    public function greaterThan($field_name,$value): bool
     {
         if($field_name > $value){
             return true;
@@ -21,7 +21,8 @@ class RuleOperators
             return  false;
         }
     }
-    public function isGreaterOrEqualTo($field_name,$value): bool
+
+    public function greaterThanOrEqualTo($field_name,$value): bool
     {
         if($field_name >= $value){
             return true;
@@ -30,7 +31,7 @@ class RuleOperators
         }
     }
 
-    public function isLessThan($field_name,$value): bool
+    public function lessThan($field_name,$value): bool
     {
         if($field_name < $value){
             return true;
@@ -38,7 +39,7 @@ class RuleOperators
             return  false;
         }
     }
-    public function isLessOrEqualTo($field_name,$value): bool
+    public function lessThanOrEqualTo($field_name,$value): bool
     {
         if($field_name <= $value){
             return true;

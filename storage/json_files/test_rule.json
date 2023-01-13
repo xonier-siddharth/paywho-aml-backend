@@ -1,0 +1,35 @@
+{
+    "condition": "and",
+    "rules": [
+        {
+            "condition": "or",
+            "rules": [
+                {
+                    "field": "amount",
+                    "operator": "greaterThanOrEqualTo",
+                    "value": 40000000000
+                },
+                {
+                    "field": "source_county",
+                    "operator": "equalTo",
+                    "value": "LT"
+                }
+            ]
+        },
+        {
+            "condition": "or",
+            "rules": [
+                {
+                    "field": "amount",
+                    "operator": "greaterThanOrEqualTo",
+                    "value": 40000000000
+                },
+                {
+                    "field": "source_county",
+                    "operator": "equalTo",
+                    "value": "LT"
+                }
+            ]
+        }
+    ]
+}
