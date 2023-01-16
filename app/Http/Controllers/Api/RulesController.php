@@ -2,85 +2,107 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\RuleOperators;
-use App\Http\Controllers\Controller;
 use App\Models\Rule;
 use Illuminate\Http\Request;
+use App\Helpers\RuleOperators;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Validator;
 
 class RulesController extends Controller
 {
-
-    private $string = "";
     private $scores = [];
 
-    public function getRule(Request $request){
+    public function createRule(Request $request){
+        $validator = Validator::make($request->all(),[
+            'code'=> 'required|string|unique:monitor_rules,code',
+            'title'=> 'required|string',
+            'target_object'=> 'required|string|in:CUSTOMER,TRANSACTION',
+            'assessment_type'=> 'required|string|in:ONLINE,RETROSPECTIVE',
+            'data'=> 'required',
+        ]);
+
+        if($validator->fails()){
+            return response($validator->messages());
+        }
+
+        $rule_array = [
+            'code'=> $request->post('code'),
+            'title'=> $request->post('title'),
+            'target_object'=> $request->post('target_object'),
+            'assessment_type'=> $request->post('assessment_type'),
+            'data'=> json_encode($request->post('data')),
+        ];
+
+        $this->validateRuleData($request->post('data'));
+
+        $result = Rule::create($rule_array);
+
+        return 'done';
+    }
+
+    public function validateRuleData($ruleData){
+        $rules = $ruleData['rules'];
+        $valid_fields = ['amount','source_country'];
+        $valid_operators = ['equalTo','greaterThan','greaterThanOrEqualTo','lessThan','lessThanOrEqualTo'];
+
+        for ($i = 0; $i < count($rules); $i++) {
+            $item = $rules[$i];
+
+            if (!array_key_exists('rules', $item)) {
+                if(!in_array($item['field'], $valid_fields) || !in_array($item['operator'], $valid_operators)){
+                    throw new \ErrorException('Invalid field name or operator choosen');
+                }
+            } else {
+                $this->validateRuleData($item);
+            }
+        }
+    }
+
+    public function validateTransaction(Request $request)
+    {
         $transactionData = DB::table('monitor_transactions')->first();
         $transactionData = (array) $transactionData;
 
-        $ruleData = json_decode(file_get_contents(storage_path()."/json_files/test_rule.json"), true);
+        $ruleData = json_decode(file_get_contents(storage_path() . "/json_files/test_rule.json"), true);
 
-        $this->decodeQuery($ruleData['rules'], $ruleData['condition'], $transactionData);
-//        $this->decodeQuery1($ruleData['rules'], $ruleData['condition'], $transactionData);
+        $eval = $this->decodeQuery($ruleData, $transactionData);
 
-//        return eval(' return '.$this->string.' ; ');
+        return eval(' return ' . $eval . ' ; ');
 
-        return ($this->string);
-        dd ($this->scores);
+        // return ($eval);
+        // dd($this->scores);
     }
 
-    public function  decodeQuery1($rules, $condition, $transactionData) {
+    public function decodeQuery($ruleData, $transactionData)
+    {
+        $rules = $ruleData['rules'];
+        $condition = $ruleData['condition'];
+        global $string;
+
         for ($i = 0; $i < count($rules); $i++) {
             $item = $rules[$i];
 
-            if(!isset($item['rules'])){
-//                $this->string .= "('". $transactionData[$item['field']] . "' ". $item['operator'] ." '". $item['value'] . "')";
-//                $this->string .= "( {$item['operator']}('{$transactionData[$item['field']]}','{$item['value']}') )";
-//
-//                if($i != count($rules)-1){
-//                    $this->string .= $condition;
-//                }
-
+            if (!array_key_exists('rules', $item)) {
                 $ruleOperators = new RuleOperators();
                 $res = $ruleOperators->{$item['operator']}($transactionData[$item['field']], $item['value']);
-                if($res){
-                    $this->scores[] = 1;
-                }else{
-                    $this->scores[] = 0;
-                }
 
-            }else{
-//                $this->string .= "(";
-                $condition_new = $item['condition'];
-                $rule = $item['rules'];
-                $this->decodeQuery1($rule, $condition_new, $transactionData);
-//                $this->string .= ")";
+                $string .= "('" . $res . "')";
+
+                if ($i < count($rules) - 1) {
+                    $string .= " " . $condition . " ";
+                }
+            } else {
+                $string .= "(";
+                $this->decodeQuery($item, $transactionData);
+                $string .= ")";
+                if ($i < count($rules) - 1) {
+                    $string .= " " . $condition . " ";
+                }
             }
         }
-    }
 
-    public function  decodeQuery($rules, $condition, $transactionData) {
-        for ($i = 0; $i < count($rules); $i++) {
-            $item = $rules[$i];
-
-            if(!isset($item['rules'])){
-                $this->string .= "('". $transactionData[$item['field']] . "' ". $item['operator'] ." '". $item['value'] . "')";
-
-                if($i < count($rules)-1){
-                    $this->string .= $condition;
-                }
-            }else{
-                $this->string .= "(";
-                $condition_new = $item['condition'];
-                $rule = $item['rules'];
-                $this->decodeQuery($rule, $condition_new, $transactionData);
-                $this->string .= ")";
-            }
-        }
+        return $string;
     }
 }
-
-
-
-
-

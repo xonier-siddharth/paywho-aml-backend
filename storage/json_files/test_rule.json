@@ -10,7 +10,7 @@
                     "value": 40000000000
                 },
                 {
-                    "field": "source_county",
+                    "field": "source_country",
                     "operator": "equalTo",
                     "value": "LT"
                 }
@@ -25,7 +25,7 @@
                     "value": 40000000000
                 },
                 {
-                    "field": "source_county",
+                    "field": "source_country",
                     "operator": "equalTo",
                     "value": "LT"
                 }

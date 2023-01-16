@@ -23,5 +23,8 @@ Route::post('/create-rule', [AMLRuleController::class, 'create_rule']);
 Route::post('/evaluate-operation', [AMLRuleController::class, 'evaluate_operation']);
 
 
+Route::post('/evaluate-transaction', [\App\Http\Controllers\Api\MonitorController::class, 'monitor_transaction']);
 
-Route::post('/getRule', [\App\Http\Controllers\Api\RulesController::class, 'getRule']);
+
+Route::post('/getRule', [\App\Http\Controllers\Api\RulesController::class, 'validateTransaction']);
+Route::post('/createRule', [\App\Http\Controllers\Api\RulesController::class, 'createRule']);
