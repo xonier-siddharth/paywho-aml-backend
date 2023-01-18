@@ -7,44 +7,44 @@ class RuleOperators
     public function equalTo($field_name,$value): bool
     {
         if($field_name == $value){
-            return true;
+            return 1;
         }else{
-            return  false;
+            return  0;
         }
     }
 
-    public function greaterThan($field_name,$value): bool
+    public function greaterThan($field_name,$value): int
     {
         if($field_name > $value){
-            return true;
+            return 1;
         }else{
-            return  false;
+            return  0;
         }
     }
 
-    public function greaterThanOrEqualTo($field_name,$value): bool
+    public function greaterThanOrEqualTo($field_name,$value): int
     {
         if($field_name >= $value){
-            return true;
+            return 1;
         }else{
-            return  false;
+            return  0;
         }
     }
 
-    public function lessThan($field_name,$value): bool
+    public function lessThan($field_name,$value): int
     {
         if($field_name < $value){
-            return true;
+            return 1;
         }else{
-            return  false;
+            return  0;
         }
     }
-    public function lessThanOrEqualTo($field_name,$value): bool
+    public function lessThanOrEqualTo($field_name,$value): int
     {
         if($field_name <= $value){
-            return true;
+            return 1;
         }else{
-            return  false;
+            return  0;
         }
     }
 

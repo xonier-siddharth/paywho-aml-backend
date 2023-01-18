@@ -9,8 +9,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class MonitorTransactionEventListener implements ShouldQueue
 {
-    use ShouldQueue;
-
     /**
      * Create the event listener.
      *
@@ -29,6 +27,7 @@ class MonitorTransactionEventListener implements ShouldQueue
      */
     public function handle(MonitorTransactionEvent $event)
     {
-        Log::alert('here');
+        // dd($event);
+        echo 'here';
     }
 }

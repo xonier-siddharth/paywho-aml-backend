@@ -26,7 +26,6 @@ class MonitorTransactionEvent
     {
         $this->transactionData = $transactionData;
         $this->rules = $rules;
-        // dd('here');
     }
 
     /**
