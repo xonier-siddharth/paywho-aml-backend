@@ -13,11 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('customer_kyc', function (Blueprint $table) {
+        Schema::create('monitor_customers', function (Blueprint $table) {
             $table->id();
             $table->string('communication_number');
             $table->string('paywho_reference_id');
-//            $table->integer('customer_id');
+           $table->integer('customer_id');
             $table->string('customer_type'); //individual or corporate user
             $table->string('first_name');
             $table->string('last_name');
@@ -30,6 +30,11 @@ return new class extends Migration
             $table->string('city');
             $table->string('country');
             $table->string('monthly_transaction_amount');
+            $table->string('profession');
+            $table->string('fund_source');
+            $table->boolean('is_blacklisted')->default(0);
+            $table->boolean('is_pep')->default(0);
+            $table->integer('risk_score')->default(0);
             $table->string('customer_status');
             $table->timestamps();
         });

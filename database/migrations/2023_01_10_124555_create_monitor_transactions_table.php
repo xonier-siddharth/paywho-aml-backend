@@ -39,6 +39,7 @@ return new class extends Migration
             $table->string('sender_ip_address');
             $table->string('payment_description');
             $table->integer('risk_score')->default(0);
+            $table->integer('is_risky_case')->default(0);
             $table->string('payment_status')->nullable();
             $table->timestamps();
         });

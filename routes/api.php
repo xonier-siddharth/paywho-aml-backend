@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/evaluate-transaction', [\App\Http\Controllers\Api\MonitorController::class, 'monitor_transaction_online']);
 
-Route::post('/validate-transaction-test', [\App\Http\Controllers\Api\MonitorController::class, 'validateTransaction']);
+Route::post('/validate-transaction-test', [\App\Http\Controllers\Api\MonitorController::class, 'validate_transaction']);
 
 Route::post('/create-rule', [\App\Http\Controllers\Api\RulesController::class, 'createRule']);
 

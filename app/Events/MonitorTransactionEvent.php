@@ -14,7 +14,7 @@ class MonitorTransactionEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $transactionData;
+    public $transaction_data;
     public $rules;
 
     /**
@@ -22,9 +22,9 @@ class MonitorTransactionEvent
      *
      * @return void
      */
-    public function __construct($transactionData, $rules)
+    public function __construct($transaction_data, $rules)
     {
-        $this->transactionData = $transactionData;
+        $this->transaction_data = $transaction_data;
         $this->rules = $rules;
     }
 

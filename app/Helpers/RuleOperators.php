@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 class RuleOperators
 {
-    public function equalTo($field_name,$value): bool
+    public function equalTo($field_name,$value): int
     {
         if($field_name == $value){
             return 1;

@@ -6,7 +6,6 @@ use App\Models\Rule;
 use Exception;
 use Illuminate\Http\Request;
 use App\Helpers\RuleOperators;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
@@ -16,7 +15,7 @@ class RulesController extends Controller
 {
     public $string = " ";
 
-    public function createRule(Request $request){
+    public function createRule(Request $request){ 
         $validator = Validator::make($request->all(),[
             'code'=> 'required|string|unique:monitor_rules,code',
             'title'=> 'required|string',
@@ -53,7 +52,7 @@ class RulesController extends Controller
 
     public function validateRuleData($ruleData){
         $rules = $ruleData['rules'];
-        $valid_fields = ['amount','source_country'];
+        $valid_fields = ['amount','source_country','destination_country'];
         $valid_operators = ['equalTo','greaterThan','greaterThanOrEqualTo','lessThan','lessThanOrEqualTo'];
 
         for ($i = 0; $i < count($rules); $i++) {
@@ -76,6 +75,7 @@ class RulesController extends Controller
 
         for ($i = 0; $i < count($rules); $i++) {
             $item = $rules[$i];
+            // print_r($item);
 
             if (!array_key_exists('rules', $item)) {
                 $ruleOperators = new RuleOperators();
@@ -90,59 +90,59 @@ class RulesController extends Controller
                 $this->decodeRule($item, $transactionData);
                 $this->string .= ")";
                 if ($i < count($rules) - 1) {
-                    $this->string .= " " . $condition . " ";
+                    $this->string .=  $condition;
                 }
             }
         }
         return $this->string;
     }
 
-    public function customEval($statement, $final_response=[], $final_response_new=[]){
-        print_r($statement);
-        for($i=0; $i<count($statement); $i++){
-            $condition = $statement[$i];
-            // print_r($condition);
-            switch ($condition) {
-                case '(0&&1)':$final_response[] = 0;
-                    break;
-                case '(1&&0)':$final_response[] = 0;
-                    break;
-                case '(1||0)':$final_response[] = 1;
-                    break;
-                case '(0||1)':$final_response[] = 1;
-                    break;
-                case '(0||0)':$final_response[] = 0;
-                    break;
-                case '(0&&0)':$final_response[] = 0;
-                    break;
-                case '(1&&1)':$final_response[] = 1;
-                    break;
-                case '(1||1)':$final_response[] = 1;
-                break;
-                case 1:$final_response[] = 1;
-                break;
-                case 0:$final_response[] = 0;
-                break;
-                case '&&':$final_response[] = '&&';
-                    break;
-                case '||':$final_response[] = '||';
-                    break;
-            }
-        }
+    // public function customEval($statement, $final_response=[], $final_response_new=[]){
+    //     print_r($statement);
+    //     for($i=0; $i<count($statement); $i++){
+    //         $condition = $statement[$i];
+    //         // print_r($condition);
+    //         switch ($condition) {
+    //             case '(0&&1)':$final_response[] = 0;
+    //                 break;
+    //             case '(1&&0)':$final_response[] = 0;
+    //                 break;
+    //             case '(1||0)':$final_response[] = 1;
+    //                 break;
+    //             case '(0||1)':$final_response[] = 1;
+    //                 break;
+    //             case '(0||0)':$final_response[] = 0;
+    //                 break;
+    //             case '(0&&0)':$final_response[] = 0;
+    //                 break;
+    //             case '(1&&1)':$final_response[] = 1;
+    //                 break;
+    //             case '(1||1)':$final_response[] = 1;
+    //             break;
+    //             case 1:$final_response[] = 1;
+    //             break;
+    //             case 0:$final_response[] = 0;
+    //             break;
+    //             case '&&':$final_response[] = '&&';
+    //                 break;
+    //             case '||':$final_response[] = '||';
+    //                 break;
+    //         }
+    //     }
 
-        foreach (array_chunk($final_response, 3) as $value) {
-            if(count($final_response) >= 3){
-                $string = "({$value[0]}{$value[1]}{$value[2]})";
-                $final_response_new[] = $string;
-                // dd($final_response_new);
-                $this->custom_eval($final_response_new);
-            }else{
-                // $string = "({$value[0]}{$value[1]}{$value[2]})";
-                // $final_response_new[] = $string;
-            }
-        }
+    //     foreach (array_chunk($final_response, 3) as $value) {
+    //         if(count($final_response) >= 3){
+    //             $string = "({$value[0]}{$value[1]}{$value[2]})";
+    //             $final_response_new[] = $string;
+    //             // dd($final_response_new);
+    //             $this->custom_eval($final_response_new);
+    //         }else{
+    //             // $string = "({$value[0]}{$value[1]}{$value[2]})";
+    //             // $final_response_new[] = $string;
+    //         }
+    //     }
         
-        dd($final_response[0]);
+    //     dd($final_response[0]);
 
-    }
+    // }
 }
