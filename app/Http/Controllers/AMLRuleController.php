@@ -40,6 +40,6 @@ class AMLRuleController extends Controller
 
         return $query;
 
-        return $res;
+        // return $res;
     }
 }

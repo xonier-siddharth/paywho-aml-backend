@@ -21,44 +21,41 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::post('/evaluate-transaction', [\App\Http\Controllers\Api\MonitorController::class, 'monitor_transaction_online']);
-
-Route::post('/validate-transaction-test', [\App\Http\Controllers\Api\MonitorController::class, 'validate_transaction']);
-
 Route::post('/create-rule', [\App\Http\Controllers\Api\RulesController::class, 'createRule']);
 
-Route::get('/true-false', function () {
-    $cases = [
-        "",
-        "0",
-        "0.0",
-        "1",
-        "01",
-        "abc",
-        "true",
-        "false",
-        "null",
-        0,
-        0.1,
-        1,
-        1.1,
-        -42,
-        "NAN",
-        (float) "NAN",
-        NAN,
-        null,
-        true,
-        false,
-        [],
-        [""],
-        ["0"],
-        [0],
-        [null],
-        ["a"],
-    ];
+// Route::get('/true-false', function () {
+//     $cases = [
+//         "",
+//         "0",
+//         "0.0",
+//         "1",
+//         "01",
+//         "abc",
+//         "true",
+//         "false",
+//         "null",
+//         0,
+//         0.1,
+//         1,
+//         1.1,
+//         -42,
+//         "NAN",
+//         (float) "NAN",
+//         NAN,
+//         null,
+//         true,
+//         false,
+//         [],
+//         [""],
+//         ["0"],
+//         [0],
+//         [null],
+//         ["a"],
+//     ];
 
-    echo "<pre>" . PHP_EOL;
+//     echo "<pre>" . PHP_EOL;
 
-    foreach ($cases as $case) {
-        printf("%s -> %s" . PHP_EOL, str_pad(json_encode($case), 10, " ", STR_PAD_RIGHT), json_encode($case == true));
-    }
-});
+//     foreach ($cases as $case) {
+//         printf("%s -> %s" . PHP_EOL, str_pad(json_encode($case), 10, " ", STR_PAD_RIGHT), json_encode($case == true));
+//     }
+// });

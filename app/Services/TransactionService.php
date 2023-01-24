@@ -16,7 +16,11 @@ class TransactionService {
             $rule_data = json_decode($rule['data'], true);
             $eval = $ruleClass->decodeRule($rule_data, $transaction_data);  //(0||1) && (0||1)
             $ruleClass->string = "";
-            $score[] = $executor->execute($eval);
+            $score[] = [
+                'rule_id' => $rule['id'],
+                'rule_title' => $rule['title'],
+                'result' => (bool) $executor->execute($eval)
+            ];
         }
 
         return $score;

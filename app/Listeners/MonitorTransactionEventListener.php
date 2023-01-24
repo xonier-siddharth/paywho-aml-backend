@@ -34,6 +34,6 @@ class MonitorTransactionEventListener implements ShouldQueue
         $rules = $event->rules;
 
         $result = $this->transactionService->validate_transaction($transaction_data, $rules);
-        echo 'done';
+        dd($result);
     }
 }

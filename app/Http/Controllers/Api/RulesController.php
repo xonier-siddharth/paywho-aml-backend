@@ -2,64 +2,77 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Rule;
 use Exception;
+use App\Models\Rule;
+use NXP\MathExecutor;
 use Illuminate\Http\Request;
 use App\Helpers\RuleOperators;
+use App\Helpers\AggregatorFunctions;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
-use NXP\MathExecutor;
 
 class RulesController extends Controller
 {
     public $string = " ";
+    private $aggregatorFuntions, $ruleOperators, $executor;
 
-    public function createRule(Request $request){ 
-        $validator = Validator::make($request->all(),[
-            'code'=> 'required|string|unique:monitor_rules,code',
-            'title'=> 'required|string',
-            'target_object'=> 'required|string|in:CUSTOMER,TRANSACTION',
-            'assessment_type'=> 'required|string|in:ONLINE,RETROSPECTIVE',
-            'data'=> 'required',
+    public function __construct(){
+        $this->aggregatorFuntions = new AggregatorFunctions();
+        $this->ruleOperators = new RuleOperators();
+        $this->executor = new MathExecutor();
+    }
+
+    public function createRule(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'target_object' => 'required|string|in:CUSTOMER,TRANSACTION',
+            'assessment_type' => 'required|string|in:ONLINE,RETROSPECTIVE',
+            'action_type' => 'required|string|in:SCORE,STATE',
+            'data' => 'required',
         ]);
 
         try {
-            if($validator->fails()){
+            if ($validator->fails()) {
                 // return response($validator->messages());
-                return $this->errorResponse($validator->messages(),400);
+                return $this->errorResponse($validator->messages(), 400);
             }
-    
+
             $rule_array = [
-                'code'=> $request->post('code'),
-                'title'=> $request->post('title'),
-                'target_object'=> $request->post('target_object'),
-                'assessment_type'=> $request->post('assessment_type'),
-                'data'=> json_encode($request->post('data')),
-                'is_enabled'=> 1,
+                'title' => $request->title,
+                'description' => $request->description,
+                'target_object' => $request->target_object,
+                'assessment_type' => $request->assessment_type,
+                'action_type' => $request->action_type,
+                'state' => $request->state,
+                'score' => $request->score,
+                'data' => json_encode($request->data),
+                'is_enabled' => 1,
             ];
-    
-            $this->validateRuleData($request->post('data'));
-    
+
+            // $this->validateRuleData($request->post('data'));
+
             $result = Rule::create($rule_array);
-    
-            return $this->successResponse($result,'rule created successfully');
+
+            return $this->successResponse($result, 'rule created successfully');
         } catch (Exception $e) {
             // return $this->errorResponse('Some Error Occured', 500);
             return $this->errorResponse($e->getMessage(), 500);
         }
     }
 
-    public function validateRuleData($ruleData){
+    public function validateRuleData($ruleData)
+    {
         $rules = $ruleData['rules'];
-        $valid_fields = ['amount','source_country','destination_country'];
-        $valid_operators = ['equalTo','greaterThan','greaterThanOrEqualTo','lessThan','lessThanOrEqualTo'];
+        $valid_fields = ['amount', 'source_country', 'destination_country'];
+        $valid_operators = ['equalTo', 'greaterThan', 'greaterThanOrEqualTo', 'lessThan', 'lessThanOrEqualTo'];
 
         for ($i = 0; $i < count($rules); $i++) {
             $item = $rules[$i];
 
             if (!array_key_exists('rules', $item)) {
-                if(!in_array($item['field'], $valid_fields) || !in_array($item['operator'], $valid_operators)){
+                if (!in_array($item['field'], $valid_fields) || !in_array($item['operator'], $valid_operators)) {
                     throw new \ErrorException('Invalid field name or operator choosen');
                 }
             } else {
@@ -68,34 +81,79 @@ class RulesController extends Controller
         }
     }
 
-    public function decodeRule($ruleData, $transactionData)
+    public function evaluate_rule($ruleData, $transactionData)
     {
-        $rules = $ruleData['rules'];
-        $condition = $ruleData['condition'];
+        $condition = $ruleData['operator'];
+        $rules = $ruleData['operands'];
 
         for ($i = 0; $i < count($rules); $i++) {
-            $item = $rules[$i];
-            // print_r($item);
+            $rule = $rules[$i];
 
-            if (!array_key_exists('rules', $item)) {
-                $ruleOperators = new RuleOperators();
-                $res = $ruleOperators->{$item['operator']}($transactionData[$item['field']], $item['value']);
-                $this->string .= "(". $res .")";
+            // if rule contents only single element
+            if ($rule['type'] == 'rule') {
+                $item = $rule['elements'];
 
-                if ($i < count($rules) - 1) {
-                    $this->string .= $condition;
+                // if rule_parameter_type is function type
+                if($item['rule_parameter_type'] == 'function_type'){
+                    // $abc = $this->aggregatorFuntions->{$item['aggregator_function']}();
+                    // $res = $this->ruleOperators->{$item['comp']}($abc, $item['value']);
+                    $this->string .= "(" . 1 . ")";
                 }
-            } else {
+
+                // if rule_parameter_type is field type
+                if($item['rule_parameter_type'] == 'field_type')
+                {
+                    $res = $this->ruleOperators->{$item['comp']}($transactionData[$item['field']], $item['value']);
+                    $this->string .= "(" . $res . ")";
+                }
+            }
+
+            // if rule contents nested rules
+            if($rule['type'] == 'rule-group'){
                 $this->string .= "(";
-                $this->decodeRule($item, $transactionData);
+                $this->evaluate_rule($rule['children'], $transactionData);
                 $this->string .= ")";
-                if ($i < count($rules) - 1) {
-                    $this->string .=  $condition;
-                }
+            }
+
+            // add the main logical operator
+            if ($i < count($rules) - 1) {
+                $this->string .= $condition;
             }
         }
         return $this->string;
     }
+
+    public function logical_expression(){
+        
+    }
+
+    // public function decodeRule($ruleData, $transactionData)
+    // {
+    //     $rules = $ruleData['rules'];
+    //     $condition = $ruleData['condition'];
+
+    //     for ($i = 0; $i < count($rules); $i++) {
+    //         $item = $rules[$i];
+
+    //         if (!array_key_exists('rules', $item)) {
+    //             $ruleOperators = new RuleOperators();
+    //             $res = $ruleOperators->{$item['operator']}($transactionData[$item['field']], $item['value']);
+    //             $this->string .= "(". $res .")";
+
+    //             if ($i < count($rules) - 1) {
+    //                 $this->string .= $condition;
+    //             }
+    //         } else {
+    //             $this->string .= "(";
+    //             $this->decodeRule($item, $transactionData);
+    //             $this->string .= ")";
+    //             if ($i < count($rules) - 1) {
+    //                 $this->string .=  $condition;
+    //             }
+    //         }
+    //     }
+    //     return $this->string;
+    // }
 
     // public function customEval($statement, $final_response=[], $final_response_new=[]){
     //     print_r($statement);
@@ -141,7 +199,7 @@ class RulesController extends Controller
     //             // $final_response_new[] = $string;
     //         }
     //     }
-        
+
     //     dd($final_response[0]);
 
     // }

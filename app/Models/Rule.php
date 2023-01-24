@@ -11,6 +11,15 @@ class Rule extends Model
     protected $table = "monitor_rules";
 
     protected $fillable = [
-        'code', 'title', 'target_object', 'assessment_type', 'data', 'is_enabled'
+        'description',
+        'category',
+        'title',
+        'target_object',
+        'assessment_type',
+        'data',
+        'is_enabled',
+        'action_type',
+        'score',
+        'state',
     ];
 }

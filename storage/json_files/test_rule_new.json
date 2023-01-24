@@ -1,0 +1,41 @@
+{
+    "operator": "||",
+    "operands": [
+        {
+            "type": "rule",
+            "elements": {
+                "rule_parameter_type": "function_type",
+                "aggregator_function": "AVG",
+                "field": "amount",
+                "comp": ">",
+                "value": 20
+            }
+        },
+        {
+            "type": "rule-group",
+            "children": {
+                "operator": "||",
+                "operands": [
+                    {
+                        "type": "rule",
+                        "elements": {
+                            "rule_parameter_type": "field_type",
+                            "field": "amount",
+                            "comp": ">=",
+                            "value": 2100
+                        }
+                    },
+                    {
+                        "type": "rule",
+                        "elements": {
+                            "rule_parameter_type": "field_type",
+                            "field": "source_country",
+                            "comp": "==",
+                            "value": "LT"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -16,7 +16,7 @@ class MonitorController extends Controller
 {
     public function monitor_transaction_online(MonitorTransactionRequest $request)
     {
-        try {
+        // try {
             $transaction_array = [
                 'communication_number' => $request->communication_number,
                 'paywho_reference_id' => $request->reference_id,
@@ -45,11 +45,12 @@ class MonitorController extends Controller
                 'receiver_account_number' => $request->receiver['account_number'],
             ];
     
-            //get all rules, applicable for this assessment mod
+            // get all rules, applicable for this assessment mod
             $rules = Rule::where('target_object', 'TRANSACTION')
                 ->where('assessment_type', 'ONLINE')
                 ->where('is_enabled', 1)->get();
-            // dd($rules);
+
+            // $rules = Rule::where('id',1)->get();
 
             $result = DB::table('monitor_transactions')->insertGetId($transaction_array);
 
@@ -61,24 +62,35 @@ class MonitorController extends Controller
             }else{
                 return $this->errorResponse('REJECTED',500);
             }
-        } catch (Exception $e) {
-            return $this->errorResponse($e->getMessage(),500);
-        }
+        // } catch (Exception $e) {
+        //     return $this->errorResponse($e->getMessage(),500);
+        // }
     }
 
     public function validate_transaction($transaction_data,$rules)
     {
         $executor = new MathExecutor();
         $ruleClass = new RulesController();
-        $score = [];
+        $applied_rules = [];
+        $score = 0;
         foreach($rules as $rule){
             $rule_data = json_decode($rule['data'], true);
-            $eval = $ruleClass->decodeRule($rule_data, $transaction_data);  //(0||1) && (0||1)
+            $eval = $ruleClass->evaluate_rule($rule_data, $transaction_data);  //(0||1) && (0||1)
+            // echo $eval;
+            // // print_r($eval);
+            // // echo ";";
             $ruleClass->string = "";
-            $score[] = [
-                'rule_code' => $rule['code'],
-                'result' => $executor->execute($eval)
+            $applied_rules[] = [
+                'rule_id' => $rule['id'],
+                'rule_title' => $rule['title'],
+                'result' => (bool) $executor->execute($eval)
             ];
+
+            // add score of applied rule if transaction data not succeeding
+            if(!$executor->execute($eval)){
+                $score += $rule['score'];
+            }
+
         }
 
         return $score;
